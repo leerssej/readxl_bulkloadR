@@ -8,7 +8,7 @@
 # Desc: Loading of Character only Datasets
 # Desc: Assembly of 
 ## Desc: * completely bound dataframes
-## Desc: * completely header-free bound dataframes
+## Desc: * completely header-free data only bound dataframes
 ## Desc: * completely bound first-instance-header dataframes
 
 library(tidyverse)
