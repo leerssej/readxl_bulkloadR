@@ -34,9 +34,18 @@ read_excel_coltypes <- function(excel_file)
 
 #### Edit File Type HERE ####
 file_extension <- ".xlsx"
+## Test local directory without spaces
+file_path <- "C:/Users/Koyot/Documents/GitHub/readxl_bulkloadR/FailStack"
+# To navigate to a file directory that travels through space filled directory names -
+# Just escape all the backslashes.
+file_path <- "C:\\Users\\Koyot\\Dropbox (BrightBytes)\\Financial Transparency Portal\\03_Implementation\\FIN Pipeline Source Files\\2015-2016\\Facts\\FailStack\\"
+setwd(file_path)
 
 # variables
-file_list <- list.files(pattern=paste0("*", file_extension))
+file_list <- 
+    list.files(
+        path = file_path,
+        pattern = paste0("*", file_extension))
 
 # Table of all the Headers
 tbl_headers <- 
@@ -83,17 +92,26 @@ read_charxl_clean <- function(excel_file)
 }
 
 # Completely bound dataframe
-tbl_complete <- 
+Tbl_complete <- 
     file_list %>% 
     map_df(~read_charxl_strong(.))
 glimpse(tbl_complete)
 
 # Completely header-free bound dataframes
-tbl_dataonly <- 
+Tbl_dataonly <- 
     file_list %>% map_df(~read_charxl_clean(.))
 glimpse(tbl_dataonly)
 
 # Completely bound first-instance-header dataframes
-tbl_complete_clean <- 
+Tbl_complete_clean <- 
     bind_rows(tbl_headers[1,-1], file_list %>% map_df(~read_charxl_clean(.)))
 glimpse(tbl_complete_clean)
+
+Tbl_CompleteIntegerTest <- 
+    Tbl_complete %>% 
+    mutate(int = as.numeric(X3) %% 1) %>% 
+    filter(int > 0)
+glimpse(Tbl_CompleteIntegerTest)
+
+10.5 %% 1
+
