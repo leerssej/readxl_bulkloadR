@@ -61,7 +61,7 @@ Tbl_widths <-
               data.frame(do.call("rbind", lapply(file_names, read_excel_width)))) %>% 
     rename(num_cols = do.call..rbind...lapply.file_names..read_excel_width..)
 glimpse(Tbl_widths)
-names(Tbl_widths)
+
 # Table of all the Headers
 Tbl_headers <- 
     bind_cols(data_frame(file_names),
@@ -110,17 +110,17 @@ read_charxl_clean <- function(excel_file)
 Tbl_complete <- 
     file_names %>% 
     map_df(~read_charxl_strong(.))
-glimpse(tbl_complete)
+glimpse(Tbl_complete)
 
 # Completely header-free bound dataframes
-Tbl_dataonly <- 
+Tbl_dataOnly <- 
     file_names %>% map_df(~read_charxl_clean(.))
-glimpse(tbl_dataonly)
+glimpse(Tbl_dataOnly)
 
 # Completely bound first-instance-header dataframes
 Tbl_complete_clean <- 
     bind_rows(tbl_headers[1,-1], file_names %>% map_df(~read_charxl_clean(.)))
-glimpse(tbl_complete_clean)
+glimpse(Tbl_complete_clean)
 
 Tbl_CompleteIntegerTest <- 
     Tbl_complete %>% 
@@ -128,5 +128,5 @@ Tbl_CompleteIntegerTest <-
     filter(int > 0)
 glimpse(Tbl_CompleteIntegerTest)
 
-10.5 %% 1
+
 
