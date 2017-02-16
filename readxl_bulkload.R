@@ -15,12 +15,20 @@ library(tidyverse)
 library(readxl)
 
 # read excel names with readxl hidden function
-read_excel_header <- function(excel_file)
+read_excel_headers <- function(excel_file)
 {
     require("readxl")
     header_row <- 
         readxl:::xlsx_col_names(excel_file)
     header_row 
+}
+
+read_excel_width <- function(excel_file)
+{
+    require("readxl")
+    header_length <- 
+        length(readxl:::xlsx_col_names(excel_file))
+    header_length 
 }
 
 # Function to read all the types with readxl hidden function
@@ -42,22 +50,29 @@ file_path <- "C:\\Users\\Koyot\\Dropbox (BrightBytes)\\Financial Transparency Po
 setwd(file_path)
 
 # variables
-file_list <- 
+file_names <- 
     list.files(
         path = file_path,
         pattern = paste0("*", file_extension))
 
+# Table of all the columns counts
+Tbl_widths <- 
+    bind_cols(data_frame(file_names),
+              data.frame(do.call("rbind", lapply(file_names, read_excel_width)))) %>% 
+    rename(num_cols = do.call..rbind...lapply.file_names..read_excel_width..)
+glimpse(Tbl_widths)
+names(Tbl_widths)
 # Table of all the Headers
-tbl_headers <- 
-    bind_cols(data_frame(file_list),
-        data.frame(do.call("rbind", lapply(file_list, read_excel_header))))
-glimpse(tbl_headers)
+Tbl_headers <- 
+    bind_cols(data_frame(file_names),
+        data.frame(do.call("rbind", lapply(file_names, read_excel_headers))))
+glimpse(Tbl_headers)
 
 # Table of all the Types
-tbl_types <- 
-    bind_cols(data_frame(file_list), 
-    data.frame(do.call("rbind", lapply(file_list, read_excel_coltypes))))
-tbl_types
+Tbl_types <- 
+    bind_cols(data_frame(file_names), 
+    data.frame(do.call("rbind", lapply(file_names, read_excel_coltypes))))
+Tbl_types
 
 # Table of the Data aligned Strongly
 ## With headers interspersed
@@ -93,18 +108,18 @@ read_charxl_clean <- function(excel_file)
 
 # Completely bound dataframe
 Tbl_complete <- 
-    file_list %>% 
+    file_names %>% 
     map_df(~read_charxl_strong(.))
 glimpse(tbl_complete)
 
 # Completely header-free bound dataframes
 Tbl_dataonly <- 
-    file_list %>% map_df(~read_charxl_clean(.))
+    file_names %>% map_df(~read_charxl_clean(.))
 glimpse(tbl_dataonly)
 
 # Completely bound first-instance-header dataframes
 Tbl_complete_clean <- 
-    bind_rows(tbl_headers[1,-1], file_list %>% map_df(~read_charxl_clean(.)))
+    bind_rows(tbl_headers[1,-1], file_names %>% map_df(~read_charxl_clean(.)))
 glimpse(tbl_complete_clean)
 
 Tbl_CompleteIntegerTest <- 
