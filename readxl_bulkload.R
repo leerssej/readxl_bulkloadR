@@ -82,6 +82,13 @@ file_names <-
         pattern = paste0("*", file_extension))
 file_names
 
+chopem <- function(element) {
+    substr(element, 1, 5)
+}
+
+file_ <- 
+    sapply(file_names, chopem)
+           
 # Table of all the columns counts
 Tbl_widths <- 
     bind_cols(data_frame(file_names),
@@ -140,3 +147,14 @@ glimpse(Tbl_CompleteIntegerTest)
 Tbl0880 <- 
     read_excel("0880_.xlsx")
 warnings()
+
+#singleton in 10L type sampling and cast
+Tbl_convert <- function (file_)
+{
+    read_charxl_strong(paste0(file_,".xlsx")) %>%
+    write.csv(paste0(file_,".csv"), na = "", row.names = F)
+}
+
+Tbl_convert('0880_')
+
+sapply(file_, Tbl_convert)
