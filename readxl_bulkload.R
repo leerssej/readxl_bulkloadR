@@ -88,6 +88,9 @@ chopem <- function(element) {
 
 file_ <- 
     sapply(file_names, chopem)
+file_
+DF_file <- data_frame(file_)
+
            
 # Table of all the columns counts
 Tbl_widths <- 
@@ -148,13 +151,14 @@ Tbl0880 <-
     read_excel("0880_.xlsx")
 warnings()
 
-#singleton in 10L type sampling and cast
+# function to character read and convert excel files
 Tbl_convert <- function (file_)
 {
-    read_charxl_strong(paste0(file_,".xlsx")) %>%
+    read_excel(paste0(file_,".xlsx"), skip = 1) %>%
     write.csv(paste0(file_,".csv"), na = "", row.names = F)
 }
 
 Tbl_convert('0880_')
-
+?write.csv()
+# Throwdown all the .csv
 sapply(file_, Tbl_convert)
