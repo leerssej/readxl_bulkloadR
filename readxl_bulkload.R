@@ -66,13 +66,21 @@ read_charxl_headless <- function(excel_file)
     headlessdatasheet 
 }
 
+# function to character read and convert excel files
+Tbl_convert <- function (file_)
+{
+    read_excel(paste0(file_,".xlsx")) %>%
+    write.csv(paste0(file_,".csv"), na = "", row.names = F)
+}
+
+chopem <- function(element) {
+    substr(element, 1, 5)
+}
+
 #### Edit File Type HERE ####
 file_extension <- ".xlsx"
 ## Test local directory without spaces
-file_path <- "C:/Users/Koyot/Documents/GitHub/readxl_bulkloadR/FailStack"
-# To navigate to a file directory that travels through space filled directory names -
-# Just escape all the backslashes.
-file_path <- "C:\\Users\\Koyot\\Dropbox (BrightBytes)\\Financial Transparency Portal\\03_Implementation\\FIN Pipeline Source Files\\2015-2016\\Facts\\FailStack\\"
+file_path <- "C:/Users/Koyot/Documents/GitHub/readxl_bulkloadR/FailStack_readxl"
 setwd(file_path)
 
 # names of files to process
@@ -82,15 +90,13 @@ file_names <-
         pattern = paste0("*", file_extension))
 file_names
 
-chopem <- function(element) {
-    substr(element, 1, 5)
-}
-
+# generate a list for autoprocessing file tree in gitbash
 file_ <- 
     sapply(file_names, chopem)
 file_
-DF_file <- data_frame(file_)
 
+# Throwdown all the .csv
+sapply(file_, Tbl_convert)
            
 # Table of all the columns counts
 Tbl_widths <- 
@@ -151,14 +157,3 @@ Tbl0880 <-
     read_excel("0880_.xlsx")
 warnings()
 
-# function to character read and convert excel files
-Tbl_convert <- function (file_)
-{
-    read_excel(paste0(file_,".xlsx"), skip = 1) %>%
-    write.csv(paste0(file_,".csv"), na = "", row.names = F)
-}
-
-Tbl_convert('0880_')
-?write.csv()
-# Throwdown all the .csv
-sapply(file_, Tbl_convert)
