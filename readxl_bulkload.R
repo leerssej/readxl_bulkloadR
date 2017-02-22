@@ -1,3 +1,4 @@
+#!/usr/bin/Rscript
 # R Script - dplyr predominant
 # Author: leerssej
 # Date;  Sat Feb 11 15:01:42 2017 
@@ -10,6 +11,7 @@
 ## Desc: * completely bound dataframes
 ## Desc: * completely header-free data only bound dataframes
 ## Desc: * completely bound first-instance-header dataframes
+install.packages("tidyverse")
 
 library(tidyverse)
 library(readxl)
@@ -93,32 +95,35 @@ file_names
 # generate a list for autoprocessing file tree in gitbash
 file_ <- 
     sapply(file_names, chopem)
+write.table(file_, "my_branch_list", na = "", row.names = F, sep = " ", col.names = F, quote = F, eol = " ")
 file_
+write_file(file_, "file_.txt")
 
 # Throwdown all the .csv
 sapply(file_, Tbl_convert)
-           
+
 # Table of all the columns counts
 Tbl_widths <- 
     bind_cols(data_frame(file_names),
               data.frame(do.call("rbind", lapply(file_names, read_excel_width)))) %>% 
     rename(num_cols = do.call..rbind...lapply.file_names..read_excel_width..)
 Tbl_widths
+write.csv(Tbl_widths, "../analysis/Tbl_widths.csv", na = "", row.names = F)
 
 # Table of all the Headers
 Tbl_headers <- 
     bind_cols(data_frame(file_names),
         data.frame(do.call("rbind", lapply(file_names, read_excel_headers))))
 glimpse(Tbl_headers)
+write.csv(Tbl_headers, "../analysis/Tbl_headers.csv", na = "", row.names = F)
+
 
 # Table of all the Types
 Tbl_types <- 
     bind_cols(data_frame(file_names), 
     data.frame(do.call("rbind", lapply(file_names, read_excel_coltypes))))
 Tbl_types
-
-
-
+write.csv(Tbl_types, "../analysis/Tbl_types.csv", na = "", row.names = F)
 
 # Table of the Data aligned Strongly
 # Completely bound dataframe
