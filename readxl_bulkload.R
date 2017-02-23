@@ -11,7 +11,7 @@
 ## Desc: * completely bound dataframes
 ## Desc: * completely header-free data only bound dataframes
 ## Desc: * completely bound first-instance-header dataframes
-install.packages("tidyverse")
+# install.packages("tidyverse", repos = "https://cran.cnr.berkeley.edu")
 
 library(tidyverse)
 library(readxl)
@@ -75,6 +75,22 @@ Tbl_convert <- function (file_)
     write.csv(paste0(file_,".csv"), na = "", row.names = F)
 }
 
+Tbl_convertAmtNumeric <- function (file_)
+{
+    read_excel(paste0(file_,".xlsx")) %>%
+        mutate(AmountNumeric = as.numeric(.[[ncol(.)]])) %>% 
+        mutate(AmountRound = ceiling(.[[ncol(.)]])) %>% 
+        write.csv(paste0(file_,".csv"), na = "", row.names = F)
+}
+
+Tbl_convertAllTextNumeric <- function (file_)
+{
+    read_charxl(paste0(file_,".xlsx")) %>%
+        mutate(AmountNumeric = as.numeric(.[[ncol(.)]])) %>% 
+        mutate(AmountRound = ceiling(.[[ncol(.)]])) %>% 
+        write.csv(paste0(file_,".csv"), na = "", row.names = F)
+}
+
 chopem <- function(element) {
     substr(element, 1, 5)
 }
@@ -97,10 +113,17 @@ file_ <-
     sapply(file_names, chopem)
 write.table(file_, "my_branch_list", na = "", row.names = F, sep = " ", col.names = F, quote = F, eol = " ")
 file_
-write_file(file_, "file_.txt")
 
 # Throwdown all the .csv
-sapply(file_, Tbl_convert)
+## straight to .csv
+# sapply(file_, Tbl_convert)
+## last column to numeric, then to ceiling
+# sapply(file_, Tbl_convertAmtNumeric)
+## all columns to text, last column to numeric
+sapply(file_, Tbl_convertAllTextNumeric)
+
+warnings()
+
 
 # Table of all the columns counts
 Tbl_widths <- 
@@ -157,8 +180,10 @@ Tbl_CompleteIntegerTest <-
     filter(int > 0)
 glimpse(Tbl_CompleteIntegerTest)
 
-#singleton in 10L type sampling and cast
-Tbl0880 <- 
-    read_excel("0880_.xlsx")
-warnings()
+# #singleton in 10L type sampling and cast
+Tbl0881 <- 
+    read_excel("0881_.xlsx") %>% 
+    mutate(AmountRound = ceiling(.[[ncol(.)]]))
+glimpse(Tbl0881)
+
 
