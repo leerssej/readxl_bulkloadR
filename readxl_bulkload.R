@@ -180,10 +180,10 @@ Tbl_CompleteIntegerTest <-
     filter(int > 0)
 glimpse(Tbl_CompleteIntegerTest)
 
-# #singleton in 10L type sampling and cast
-Tbl0881 <- 
-    read_excel("0881_.xlsx") %>% 
-    mutate(AmountRound = ceiling(.[[ncol(.)]]))
-glimpse(Tbl0881)
-
+# # #singleton in 10L type sampling and cast
+# Tbl0881 <- 
+#     read_excel("0881_.xlsx") %>% 
+#     mutate(AmountRound = ceiling(.[[ncol(.)]]))
+# glimpse(Tbl0881)
+# 
 
