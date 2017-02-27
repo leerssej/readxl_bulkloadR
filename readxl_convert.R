@@ -55,45 +55,6 @@ read_charxl_full <- function(excel_file)
     datasheet 
 }
 
-# Read excel dataframe
-## With headers all clipped - 
-### All types are recast `as.character`
-read_charxl_headless <- function(excel_file)
-{
-    require("readxl")
-    num_columns <- length(readxl:::xlsx_col_types(excel_file, nskip = 0, n = 1))
-    headlessdatasheet <- readxl::read_excel(excel_file,
-                                       col_types = rep("text", num_columns),
-                                       col_names = F,
-                                       skip = 1)
-    headlessdatasheet 
-}
-
-# function to character read and convert excel files
-Tbl_convert <- function (file_)
-{
-    read_excel(paste0(file_,".xlsx")) %>%
-    write.csv(paste0(file_,".csv"), na = "", row.names = F)
-}
-
-Tbl_convertAmtNumeric <- function (file_)
-{
-    read_excel(paste0(file_,".xlsx")) %>%
-        mutate(AmountNumeric = as.numeric(.[[ncol(.)]])) %>% 
-        mutate(AmountRound = ceiling(.[[ncol(.)]])) %>%
-        select(1:10, ncol(.)) %>% 
-        write.csv(paste0(file_,".csv"), na = "", row.names = F)
-}
-
-Tbl_convertAllTextLastCol2Numeric <- function (file_)
-{
-    read_charxl_full(paste0(file_,".xlsx")) %>%
-        mutate(AmountNumeric = as.numeric(.[[ncol(.)]])) %>% 
-        mutate(AmountRound = ceiling(.[[ncol(.)]])) %>%
-        select(1:10, ncol(.)) %>% 
-        write.csv(paste0(file_,".csv"), na = "", row.names = F)
-}
-
 Tbl_convertAllText2Numeric <- function (file_)
 {
     read_charxl_full(paste0(file_,".xlsx")) %>%
@@ -125,11 +86,9 @@ file_names
 # generate a list for autoprocessing file tree in gitbash
 file_ <- 
     sapply(file_names, chopem)
-# 
+# write my_branch_list to run the git branch building
 write.table(file_, "my_branch_list", na = "", row.names = F, sep = " ", col.names = F, quote = F, eol = " ")
 file_
-
-
 
 # Table of all the columns counts
 Tbl_widths <- 
@@ -146,7 +105,6 @@ Tbl_headers <-
 glimpse(Tbl_headers)
 write.csv(Tbl_headers, "../analysis/Tbl_headers.csv", na = "", row.names = F)
 
-
 # Table of all the Types
 Tbl_types <- 
     bind_cols(data_frame(file_names), 
@@ -154,56 +112,6 @@ Tbl_types <-
 Tbl_types
 write.csv(Tbl_types, "../analysis/Tbl_types.csv", na = "", row.names = F)
 
-# Table of the Data aligned fullly
-# Completely bound dataframe
-Tbl_complete <- 
-    file_names %>% 
-    map_df(~read_charxl_full(.))
-glimpse(Tbl_complete)
-
-# Completely header-free bound dataframes
-Tbl_dataOnly <- 
-    file_names %>% map_df(~read_charxl_headless(.))
-glimpse(Tbl_dataOnly)
-
-# Table of the Data aligned cleanly
-# Completely bound first-instance-header dataframes
-## With headers all clipped - 
-### All types are recast `as.character`
-#### NB: Prudent wranglers will not rely on merging dataframes unreviewed.
-#### NB: Specifically, the headers are not integrated in final dataframe 
-#### NB: This means that dataframes are essentially row_bound.
-#### NB: Be sure that you have checked that columns align properly between 
-#### NB: dataframes. Use Header tables diligently.
-Tbl_complete_clean <- 
-    bind_rows(Tbl_headers[1,-1], file_names %>% map_df(~read_charxl_headless(.)))
-glimpse(Tbl_complete_clean)
-warnings()
-
-Tbl_CompleteIntegerTest <- 
-    Tbl_complete %>% 
-    mutate(int = suppressWarnings(as.numeric(X11)) %% 1) %>% 
-    filter(int > 0)
-glimpse(Tbl_CompleteIntegerTest)
-
-# # #singleton for function development
-# Tbl0881 <-
-#     read_charxl_full("1380_.xlsx") %>% 
-#     mutate(AmountNumeric = suppressWarnings(as.numeric(.[[ncol(.)]]))) %>% 
-#     mutate(AmountRound = ceiling(.[[ncol(.)]])) %>%
-#     select(1:10, ncol(.)) %>% 
-#     filter(!is.na(AmountRound)) %>% 
-#     mutate_all(funs(as.numeric))
-# glimpse(Tbl0881)
-
-# 
-# Throwdown all the .csv
-## straight to .csv
-# sapply(file_, Tbl_convert)
-## last column to numeric, then to ceiling
-# sapply(file_, Tbl_convertAmtNumeric)
-## all columns to text, last column to numeric
-# sapply(file_, Tbl_convertAllTextNumeric)
 ## all columns to text, last column to numeric
 sapply(file_, Tbl_convertAllText2Numeric)
 warnings()
