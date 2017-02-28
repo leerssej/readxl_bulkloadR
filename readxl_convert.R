@@ -55,16 +55,18 @@ read_charxl_full <- function(excel_file)
     datasheet 
 }
 
+intSpprssWarns <- function(variables) {
+    suppressWarnings(as.integer(variables)) # NA's are inevitable for strings
+}
+
 Tbl_convertAllText2Numeric <- function (file_)
 {
     read_charxl_full(paste0(file_,".xlsx")) %>%
-    mutate(AmountInteger = suppressWarnings(as.integer(.[[ncol(.)]]))) %>% # last col to int
-    select(1:10, ncol(.)) %>% # select 10 + Corrected Amount
-    filter(!is.na(AmountInteger)) %>% 
-    mutate_all(funs(as.integer)) %>% 
+    mutate_all(funs(intSpprssWarns)) %>% # convert all cols to ints
+    select(1:11) %>% # just the columns that we need
+    filter(!is.na(X11)) %>% # drop the headers if they had been there
     write.csv(paste0(file_,".csv"), na = "", row.names = F)
 }
-
 
 chopem <- function(element) {
     substr(element, 1, 5)
