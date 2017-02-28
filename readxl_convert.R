@@ -58,13 +58,13 @@ read_charxl_full <- function(excel_file)
 Tbl_convertAllText2Numeric <- function (file_)
 {
     read_charxl_full(paste0(file_,".xlsx")) %>%
-        mutate(AmountNumeric = suppressWarnings(as.numeric(.[[ncol(.)]]))) %>% # last col to num
-        mutate(AmountRound = ceiling(.[[ncol(.)]])) %>% #round last col
+        mutate(AmountInteger = (as.integer(.[[ncol(.)]]))) %>% # last col to int
         select(1:10, ncol(.)) %>% # select 10 + Corrected Amount
-        filter(!is.na(AmountRound)) %>% 
-        mutate_all(funs(as.numeric)) %>% 
+        filter(!is.na(AmountInteger)) %>% 
+        mutate_all(funs(as.integer())) %>% 
         write.csv(paste0(file_,".csv"), na = "", row.names = F)
-        }
+}
+
 
 chopem <- function(element) {
     substr(element, 1, 5)
@@ -115,3 +115,15 @@ write.csv(Tbl_types, "../analysis/Tbl_types.csv", na = "", row.names = F)
 ## all columns to text, last column to numeric
 sapply(file_, Tbl_convertAllText2Numeric)
 warnings()
+
+# csv1500 <-
+#     read.csv("1500_.csv", stringsAsFactors = F, na.strings = c("", " ", "NA"))
+# glimpse(csv1500)
+# 
+# xlsx1500 <- 
+#     read_charxl_full("1500_.xlsx") %>%
+#     mutate(AmountInteger = as.integer(.[[ncol(.)]])) %>% # last col to num
+#     select(1:10, ncol(.)) %>% # select 10 + Integerized Amount
+#     filter(!is.na(AmountInteger)) %>% 
+#     mutate_all(funs(as.integer)) %>%
+#     write.csv("csv1500conv.csv", na = "", row.names = F)
