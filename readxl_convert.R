@@ -17,15 +17,6 @@
 library(tidyverse)
 library(readxl)
 
-# read excel names with readxl hidden function
-read_excel_headers <- function(excel_file)
-{
-    require("readxl")
-    header_row <- 
-        readxl:::xlsx_col_names(excel_file)
-    header_row 
-}
-
 read_excel_width <- function(excel_file)
 {
     require("readxl")
@@ -34,14 +25,26 @@ read_excel_width <- function(excel_file)
     header_length 
 }
 
+# read excel names with readxl hidden function
+read_excel_headers <- function(excel_file)
+{
+    require("readxl")
+    header_row <- 
+        readxl:::xlsx_col_names(excel_file) %>% 
+        .[1:11]
+    header_row 
+}
+
 # Function to read all the types with readxl hidden function
 read_excel_coltypes <- function(excel_file)
 {
     require("readxl")
     column_types <-
-        readxl:::xlsx_col_types(excel_file, nskip = 1, n = 1)
+        readxl:::xlsx_col_types(excel_file, nskip = 1, n = 1) %>% 
+        .[1:11]
     column_types
 }
+
 # Read excel dataframe
 ## With headers
 ### All types are recast `as.character``
