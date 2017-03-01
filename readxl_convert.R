@@ -58,16 +58,19 @@ read_charxl_full <- function(excel_file)
     datasheet 
 }
 
-intSpprssWarns <- function(variables) {
-    suppressWarnings(as.integer(variables)) # NA's are inevitable for strings
+intSpprssWrns <- function(variables) {
+    suppressWarnings(as.integer(variables))
 }
 
 Tbl_convertAllText2Numeric <- function (file_)
 {
-    mutate(AmountInteger = suppressWarnings(as.integer(.[[ncol(.)]]))) %>% # last col to int
+    read_charxl_full(paste0(file_,".xlsx")) %>%
+    select(1:11) %>% 
+    mutate(AmountDouble = suppressWarnings(as.double(.[[ncol(.)]]))) %>% # last col to int
+    mutate(AmountRoundup = ceiling(.[[ncol(.)]])) %>% # round last col
     select(1:10, ncol(.)) %>% # select 10 + Corrected Amount
-    filter(!is.na(AmountInteger)) %>% 
-    mutate_all(funs(as.integer)) %>% 
+    filter(!is.na(AmountRoundup)) %>% 
+    mutate_all(funs(intSpprssWrns(.))) %>% 
     write.csv(paste0(file_,".csv"), na = "", row.names = F)
 }
 
@@ -78,7 +81,7 @@ Tbl_convertAllText2Numeric <- function (file_)
 #     select(1:11) %>% # just the columns that we need
 #     filter(suppressWarnings(!is.na(X11))) %>% # drop the headers if they had been there
 #     write.csv(paste0(file_,".csv"), na = "", row.names = F)
-}
+# }
 
 chopem <- function(element) {
     substr(element, 1, 5)
@@ -130,7 +133,3 @@ write.csv(Tbl_types, "../analysis/Tbl_types.csv", na = "", row.names = F)
 sapply(file_, Tbl_convertAllText2Numeric)
 warnings()
 
-# csv1500 <-
-#     read.csv("1500_.csv", stringsAsFactors = F, na.strings = c("", " ", "NA"))
-# glimpse(csv1500)
-# 
