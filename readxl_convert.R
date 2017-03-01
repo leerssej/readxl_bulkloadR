@@ -64,11 +64,20 @@ intSpprssWarns <- function(variables) {
 
 Tbl_convertAllText2Numeric <- function (file_)
 {
-    read_charxl_full(paste0(file_,".xlsx")) %>%
-    mutate_all(funs(intSpprssWarns)) %>% # convert all cols to ints
-    select(1:11) %>% # just the columns that we need
-    filter(suppressWarnings(!is.na(X11))) %>% # drop the headers if they had been there
+    mutate(AmountInteger = suppressWarnings(as.integer(.[[ncol(.)]]))) %>% # last col to int
+    select(1:10, ncol(.)) %>% # select 10 + Corrected Amount
+    filter(!is.na(AmountInteger)) %>% 
+    mutate_all(funs(as.integer)) %>% 
     write.csv(paste0(file_,".csv"), na = "", row.names = F)
+}
+
+# Tbl_convertAllText2Numeric <- function (file_)
+# {
+#     read_charxl_full(paste0(file_,".xlsx")) %>%
+#     mutate_all(funs(intSpprssWarns)) %>% # convert all cols to ints
+#     select(1:11) %>% # just the columns that we need
+#     filter(suppressWarnings(!is.na(X11))) %>% # drop the headers if they had been there
+#     write.csv(paste0(file_,".csv"), na = "", row.names = F)
 }
 
 chopem <- function(element) {
