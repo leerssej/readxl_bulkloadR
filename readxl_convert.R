@@ -58,9 +58,46 @@ read_charxl_full <- function(excel_file)
     datasheet 
 }
 
-intSpprssWrns <- function(variables) {
+as.double_spprssWrns <- function(variables) 
+{
+    suppressWarnings(as.double(variables))
+}
+
+as.integer_spprssWrns <- function(variables) 
+{
     suppressWarnings(as.integer(variables))
 }
+
+# Read in just the data
+## stripping out anything that can't get converted to doubles
+read_charxl_data <- function(excel_file) 
+{
+    dataOnly <- 
+        read_charxl_full(excel_file) %>% 
+        mutate_all(funs(as.double_spprssWrns)) %>% 
+        filter(!is.na(X11))
+    dataOnly
+}
+
+# Use dataOnly frame to generate count of rows of data in file
+dataRowCount <- function(excel_file) 
+{
+    dataRowCount <- 
+        read_charxl_data(excel_file) %>% 
+        nrow
+    dataRowCount
+}
+
+sumOfColumn <- function(excel_file, col) 
+{
+    sum_of_column <- 
+         read_charxl_data(excel_file) %>% 
+         select_(col) %>% 
+         summarise_all(funs(sum)) 
+    sum_of_column
+}
+
+# warnings()
 
 Tbl_convertAllText2Numeric <- function (file_)
 {
@@ -69,8 +106,8 @@ Tbl_convertAllText2Numeric <- function (file_)
     mutate(AmountDouble = suppressWarnings(as.double(.[[ncol(.)]]))) %>% # last col to int
     mutate(AmountRoundup = ceiling(.[[ncol(.)]])) %>% # round last col
     select(1:10, ncol(.)) %>% # select 10 + Corrected Amount
-    filter(!is.na(AmountRoundup)) %>% 
-    mutate_all(funs(intSpprssWrns(.))) %>% 
+    filter(suppressWarnings(!is.na(AmountRoundup))) %>% 
+    mutate_all(funs(as.integer_spprssWrns(.))) %>% 
     write.csv(paste0(file_,".csv"), na = "", row.names = F)
 }
 
@@ -87,8 +124,23 @@ chopem <- function(element) {
     substr(element, 1, 5)
 }
 
+read_csv_data <- function(csv_file) 
+{
+    csv_data <- 
+        read.csv(paste0(csv_file, ".csv"),
+                 stringsAsFactors = F,
+                 na.strings = c("", " ", "NA")) %>% 
+        mutate_all(funs(as.double_spprssWrns)) 
+    csv_data
+}
+glimpse(read_csv_data("1530_"))
+
+df_csv <- read.csv(paste0(csv_file, ".csv"), stringsAsFactors = F, na.strings = c("", " ", "NA"))
+glimpse(df_csv)
+
+
 #### Edit File Type HERE ####
-file_extension <- ".xlsx"
+file_extension <- "xlsx"
 ## Test local directory without spaces
 file_path <- "C:/Users/Koyot/Documents/GitHub/readxl_bulkloadR/bulkloadR_staging/"
 setwd(file_path)
@@ -97,7 +149,7 @@ setwd(file_path)
 file_names <- 
     list.files(
         path = file_path,
-        pattern = paste0("*", file_extension))
+        pattern = paste0("*.", file_extension))
 file_names
 
 # generate a list for autoprocessing file tree in gitbash
@@ -118,18 +170,49 @@ write.csv(Tbl_widths, "../analysis/Tbl_widths.csv", na = "", row.names = F)
 # Table of all the Headers
 Tbl_headers <- 
     bind_cols(data_frame(file_names),
-        data.frame(do.call("rbind", lapply(file_names, read_excel_headers))))
+              data.frame(do.call("rbind", lapply(file_names, read_excel_headers))))
 glimpse(Tbl_headers)
 write.csv(Tbl_headers, "../analysis/Tbl_headers.csv", na = "", row.names = F)
 
 # Table of all the Types
 Tbl_types <- 
     bind_cols(data_frame(file_names), 
-    data.frame(do.call("rbind", lapply(file_names, read_excel_coltypes))))
+              data.frame(do.call("rbind", lapply(file_names, read_excel_coltypes))))
 Tbl_types
 write.csv(Tbl_types, "../analysis/Tbl_types.csv", na = "", row.names = F)
+
+Tbl_dataRowCounts_xlsx <-
+    bind_cols(data_frame(file_names),
+              data.frame(do.call("rbind", lapply(file_names, dataRowCount)))) %>%
+    rename(num_cols = do.call..rbind...lapply.file_names..dataRowCount..)
+Tbl_dataRowCounts_xlsx
+write.csv(Tbl_dataRowCounts_xlsx, "Tbl_dataRowCounts_xlsx.csv", na = "", row.names = F)
+
+list_of_sums_xlsx <- lapply(file_names, sumOfColumn, ~X11)
+Tbl_AmountSums_xlsx <-
+    bind_cols(data_frame(file_),
+              data.frame(do.call("rbind", list_of_sums)))
+
+# Launch into csv
+Tbl_dataRowCounts_csv <-
+    bind_cols(data_frame(file_names),
+              data.frame(do.call("rbind", lapply(file_names, dataRowCount)))) %>%
+    rename(num_cols = do.call..rbind...lapply.file_names..dataRowCount..)
+Tbl_dataRowCounts_xlsx
+write.csv(Tbl_dataRowCounts_xlsx, "Tbl_dataRowCounts_xlsx.csv", na = "", row.names = F)
+
+list_of_sums_csv <- lapply(file_names, sumOfColumn, ~X11)
+Tbl_AmountSums_csv <-
+    bind_cols(data_frame(file_),
+              data.frame(do.call("rbind", list_of_sums)))
+
+Tbl_da
+
+%>%
+    rename_("Ttl_Amounts" = ~X11)
+Tbl_AmountSums
+write.csv(Tbl_AmountSums, "Tbl_AmountSums.csv", na = "", row.names = F)
 
 ## all columns to text, last column to numeric
 sapply(file_, Tbl_convertAllText2Numeric)
 warnings()
-
