@@ -70,6 +70,7 @@ as.integer_spprssWrns <- function(variables)
 
 # Read in just the data
 ## stripping out anything that can't get converted to doubles
+## ## ## filtering on the amount column ## ## ##
 read_charxl_data <- function(excel_file) 
 {
     dataOnly <- 
@@ -124,13 +125,16 @@ chopem <- function(element) {
     substr(element, 1, 5)
 }
 
+### csv side of universe
+
 read_csv_data <- function(csv_file) 
 {
     csv_data <- 
         read.csv(paste0(csv_file, ".csv"),
                  stringsAsFactors = F,
                  na.strings = c("", " ", "NA")) %>% 
-        mutate_all(funs(as.double_spprssWrns)) 
+        mutate_all(funs(as.double_spprssWrns)) %>% 
+        filter(!is.na(AmountRound))
     csv_data
 }
 glimpse(read_csv_data("1530_"))
@@ -193,7 +197,7 @@ Tbl_AmountSums_xlsx <-
     bind_cols(data_frame(file_),
               data.frame(do.call("rbind", list_of_sums)))
 
-# Launch into csv
+# Launch into csv side of the universe
 Tbl_dataRowCounts_csv <-
     bind_cols(data_frame(file_names),
               data.frame(do.call("rbind", lapply(file_names, dataRowCount)))) %>%
