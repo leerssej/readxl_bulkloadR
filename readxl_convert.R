@@ -81,7 +81,7 @@ read_charxl_data <- function(excel_file)
 }
 
 # Use dataOnly frame to generate count of rows of data in file
-dataRowCount <- function(excel_file) 
+dataRowCount_excel <- function(excel_file) 
 {
     dataRowCount <- 
         read_charxl_data(excel_file) %>% 
@@ -89,7 +89,8 @@ dataRowCount <- function(excel_file)
     dataRowCount
 }
 
-sumOfColumn <- function(excel_file, col) 
+# Use dataOnly frame to generate sum of specified column
+sumOfColumn_excel <- function(excel_file, col) 
 {
     sum_of_column <- 
          read_charxl_data(excel_file) %>% 
@@ -105,12 +106,14 @@ Tbl_convertAllText2Numeric <- function (file_)
     read_charxl_full(paste0(file_,".xlsx")) %>%
     select(1:11) %>% 
     mutate(AmountDouble = suppressWarnings(as.double(.[[ncol(.)]]))) %>% # last col to int
-    mutate(AmountRoundup = ceiling(.[[ncol(.)]])) %>% # round last col
+    mutate(AmountRoundup = round(.[[ncol(.)]])) %>% # round last col
     select(1:10, ncol(.)) %>% # select 10 + Corrected Amount
     filter(suppressWarnings(!is.na(AmountRoundup))) %>% 
     mutate_all(funs(as.integer_spprssWrns(.))) %>% 
     write.csv(paste0(file_,".csv"), na = "", row.names = F)
 }
+
+?round
 
 # Tbl_convertAllText2Numeric <- function (file_)
 # {
@@ -127,21 +130,40 @@ chopem <- function(element) {
 
 ### csv side of universe
 
-read_csv_data <- function(csv_file) 
+read_csv_data <- function(csv_file, filter_col) 
 {
     csv_data <- 
         read.csv(paste0(csv_file, ".csv"),
                  stringsAsFactors = F,
                  na.strings = c("", " ", "NA")) %>% 
         mutate_all(funs(as.double_spprssWrns)) %>% 
-        filter(!is.na(AmountRound))
+        filter_(!is.na(filter_col))
     csv_data
 }
-glimpse(read_csv_data("1530_"))
 
-df_csv <- read.csv(paste0(csv_file, ".csv"), stringsAsFactors = F, na.strings = c("", " ", "NA"))
-glimpse(df_csv)
+# glimpse(read_csv_data("1530_", "AmountRoundup"))
 
+# Use dataOnly frame to generate count of rows of data in file
+dataRowCount_csv <- function(csv_file, filter_col) 
+{
+    dataRowCount <- 
+        read_csv_data(csv_file, filter_col) %>% 
+        nrow
+    dataRowCount
+}
+
+dataRowCount_csv("1530_", "AmountRoundup")
+# Use dataOnly frame to generate sum of specified column
+sumOfColumn_csv <- function(csv_file, sum_col, filter_col) 
+{
+    sum_of_column <- 
+        read_csv_data(csv_file, filter_col) %>% 
+        select_(sum_col) %>% 
+        summarise_all(funs(sum)) 
+    sum_of_column
+}
+
+# sumOfColumn_csv("1530_", "AmountRoundup", "AmountRoundup")
 
 #### Edit File Type HERE ####
 file_extension <- "xlsx"
@@ -185,38 +207,62 @@ Tbl_types <-
 Tbl_types
 write.csv(Tbl_types, "../analysis/Tbl_types.csv", na = "", row.names = F)
 
+# Excel Specific Summary MetaTables
+## data Row Counts
 Tbl_dataRowCounts_xlsx <-
-    bind_cols(data_frame(file_names),
-              data.frame(do.call("rbind", lapply(file_names, dataRowCount)))) %>%
-    rename(num_cols = do.call..rbind...lapply.file_names..dataRowCount..)
+    bind_cols(data_frame(file_),
+              data.frame(do.call("rbind", lapply(file_names, dataRowCount_excel)))) %>%
+    rename(num_dRows = do.call..rbind...lapply.file_names..dataRowCount_excel..)
 Tbl_dataRowCounts_xlsx
-write.csv(Tbl_dataRowCounts_xlsx, "Tbl_dataRowCounts_xlsx.csv", na = "", row.names = F)
+write.csv(Tbl_dataRowCounts_xlsx, "../analysis/Tbl_dataRowCounts_xlsx.csv", na = "", row.names = F)
 
-list_of_sums_xlsx <- lapply(file_names, sumOfColumn, ~X11)
+## AmountTotals summary Excel
+### List of totals which avoids closure issues
+list_of_sums_xlsx <- lapply(file_names, sumOfColumn_excel, ~X11)
+### Bound Table
 Tbl_AmountSums_xlsx <-
     bind_cols(data_frame(file_),
-              data.frame(do.call("rbind", list_of_sums)))
+              data.frame(do.call("rbind", list_of_sums_xlsx))) %>% 
+    rename_("Ttl_Amounts" = ~X11)
+Tbl_AmountSums_xlsx
+write.csv(Tbl_AmountSums_xlsx, "../analysis/Tbl_AmountSums_xlsx.csv", na = "", row.names = F)
 
 # Launch into csv side of the universe
-Tbl_dataRowCounts_csv <-
-    bind_cols(data_frame(file_names),
-              data.frame(do.call("rbind", lapply(file_names, dataRowCount)))) %>%
-    rename(num_cols = do.call..rbind...lapply.file_names..dataRowCount..)
-Tbl_dataRowCounts_xlsx
-write.csv(Tbl_dataRowCounts_xlsx, "Tbl_dataRowCounts_xlsx.csv", na = "", row.names = F)
-
-list_of_sums_csv <- lapply(file_names, sumOfColumn, ~X11)
-Tbl_AmountSums_csv <-
-    bind_cols(data_frame(file_),
-              data.frame(do.call("rbind", list_of_sums)))
-
-Tbl_da
-
-%>%
-    rename_("Ttl_Amounts" = ~X11)
-Tbl_AmountSums
-write.csv(Tbl_AmountSums, "Tbl_AmountSums.csv", na = "", row.names = F)
-
 ## all columns to text, last column to numeric
+## the last column is also ceilinged to the integer penny
 sapply(file_, Tbl_convertAllText2Numeric)
 warnings()
+
+# csv Specific Summary MetaTables
+## data Row Counts
+
+Tbl_dataRowCounts_csv <-
+    bind_cols(data_frame(file_),
+              data.frame(do.call("rbind", lapply(file_, dataRowCount_csv, "AmountRoundup")))) %>% 
+    rename(num_dRows = do.call..rbind...lapply.file_..dataRowCount_csv...AmountRoundup...)
+Tbl_dataRowCounts_csv
+write.csv(Tbl_dataRowCounts_csv, "../analysis/Tbl_dataRowCounts_csv.csv", na = "", row.names = F)
+
+
+## AmountTotals summary csv
+### List of totals which avoids closure issues
+list_of_sums_csv <- lapply(file_, sumOfColumn_csv, "AmountRoundup", "AmountRoundup")
+### Bound Table
+Tbl_AmountSums_csv <-
+    bind_cols(data_frame(file_),
+              data.frame(do.call("rbind", list_of_sums_csv))) %>% 
+    rename_("Ttl_Amounts" = "AmountRoundup")
+Tbl_AmountSums_csv
+write.csv(Tbl_AmountSums_csv, "../analysis/Tbl_AmountSums_csv.csv", na = "", row.names = F)
+
+
+# Integrity cross check
+Tbl_AmountSums_csv
+Tbl_AmountSums_xlsx
+identical(Tbl_AmountSums_csv, Tbl_AmountSums_xlsx)
+all.equal(Tbl_AmountSums_csv, Tbl_AmountSums_xlsx)
+
+Tbl_dataRowCounts_csv
+Tbl_dataRowCounts_xlsx
+identical(Tbl_dataRowCounts_csv, Tbl_dataRowCounts_xlsx)
+all.equal(Tbl_dataRowCounts_csv, Tbl_dataRowCounts_xlsx)
