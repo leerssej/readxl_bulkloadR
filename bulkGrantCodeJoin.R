@@ -55,6 +55,6 @@ glimpse(finco_594grants_objects)
 ### 2) getting a snapshot of distinct districts and schools involved.
 ## Waiting for feedback on the best way to quantify the issues for Evan.
 
-finco_594grants_counts <- 
-    finco_594grants %>% 
-    group_by()
+# finco_594grants_counts <- 
+#     finco_594grants %>% 
+#     group_by()
