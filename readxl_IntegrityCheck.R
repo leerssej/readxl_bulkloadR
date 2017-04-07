@@ -189,18 +189,17 @@ file_
 cat("\n")
 
 # Table of all the columns counts
-Tbl_widths <- 
+Tbl_widths <-
     bind_cols(data_frame(file_names),
-              data.frame(do.call("rbind", lapply(file_names, read_excel_width)))) %>% 
+              data.frame(do.call("rbind", lapply(file_names, read_excel_width)))) %>%
     rename(num_cols = do.call..rbind...lapply.file_names..read_excel_width..)
 print("Tbl_Widths:")
 Tbl_widths
 write.csv(Tbl_widths, "../analysis/Tbl_widths.csv", na = "", row.names = F)
 cat("\n")
 
-
 # Table of all the Headers
-Tbl_headers <- 
+Tbl_headers <-
     bind_cols(data_frame(file_names),
               data.frame(do.call("rbind", lapply(file_names, read_excel_headers))))
 print("Tbl_headers:")
@@ -209,8 +208,8 @@ write.csv(Tbl_headers, "../analysis/Tbl_headers.csv", na = "", row.names = F)
 cat("\n")
 
 # Table of all the Types
-Tbl_types <- 
-    bind_cols(data_frame(file_names), 
+Tbl_types <-
+    bind_cols(data_frame(file_names),
               data.frame(do.call("rbind", lapply(file_names, read_excel_coltypes))))
 print("Tbl_types:")
 Tbl_types
@@ -228,8 +227,6 @@ print("Tbl_dataRowCounts_xlsx")
 Tbl_dataRowCounts_xlsx
 write.csv(Tbl_dataRowCounts_xlsx, "../analysis/Tbl_dataRowCounts_xlsx.csv", na = "", row.names = F)
 cat("\n")
-
-
 
 print("Building Excel MetaTables")
 ## AmountTotals summary Excel
