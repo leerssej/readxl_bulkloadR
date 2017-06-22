@@ -125,7 +125,7 @@ csv_convertAllText2bigint <- function (file_)
 
 
 # csv side of universe
-chopem <- function(element) {
+chopit <- function(element) {
     substr(element, 1, 5)
 }
 
@@ -181,7 +181,7 @@ file_names
 
 # generate a list for autoprocessing file tree in gitbash
 file_ <- 
-    sapply(file_names, chopem)
+    sapply(file_names, chopit)
 # write my_branch_list to run the git branch building
 write.table(file_, "my_branch_list", na = "", row.names = F, sep = " ", col.names = F, quote = F, eol = " ")
 print("file_:")
