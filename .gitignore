@@ -47,3 +47,5 @@ Temporary Items
 .apdisk
 .Rproj.user
 .Rhistory
+*.csv
+bulkloadR_staging/my_branch_list
