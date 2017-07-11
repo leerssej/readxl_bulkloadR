@@ -13,6 +13,8 @@
 ## Desc: * completely bound first-instance-header dataframes
 # install.packages("tidyverse", repos = "https://cran.cnr.berkeley.edu")
 # install.packages("bit64", repos = "https://cran.cnr.berkeley.edu")
+# install.packages("devtools", repos = "https://cran.cnr.berkeley.edu")
+# devtools::install_github("hadley/dplyr")
 
 library(tidyverse)
 library(readxl)
@@ -21,31 +23,25 @@ library(bit64)
 ###### 1. Function Library ######
 ## Excel Reading
 read_excel_width <- function(excel_file)
-{
-    require("readxl")
-    header_length <- 
-        length(readxl:::xlsx_col_names(excel_file))
-    header_length 
+{ 
+    length(read_excel(excel_file, n_max = 0))
 }
 
-# read excel names with readxl hidden function
+# read excel names
 read_excel_headers <- function(excel_file)
 {
-    require("readxl")
-    header_row <- 
-        readxl:::xlsx_col_names(excel_file) %>% 
+    read_excel(excel_file, n_max = 0) %>% 
+        names %>% 
         .[1:11]
-    header_row 
 }
 
-# Function to read all the types with readxl hidden function
+# Function to read all the types
 read_excel_coltypes <- function(excel_file)
 {
-    require("readxl")
-    column_types <-
-        readxl:::xlsx_col_types(excel_file, nskip = 1, n = 1) %>% 
-        .[1:11]
-    column_types
+    read_excel(excel_file, skip = 1, n_max = 1) %>%
+        lapply(., class) %>%
+        .[1:11] %>%
+        unlist
 }
 
 # Read excel dataframe
@@ -53,13 +49,9 @@ read_excel_coltypes <- function(excel_file)
 ### All types are recast `as.character``
 read_charxl_full <- function(excel_file)
 {
-    require("readxl")
-    num_columns <- length(readxl:::xlsx_col_types(excel_file, nskip = 0, n = 1))
-    datasheet <- readxl::read_excel(excel_file,
-                                       col_types = rep("text", num_columns),
-                                       col_names = F)
-    datasheet 
+    read_excel(excel_file, col_types ="text", col_names = F)
 }
+read_charxl_full("1760_.xlsx")
 
 as.double_spprssWrns <- function(variables) 
 {
@@ -76,23 +68,20 @@ as.bigint_spprssWrns <- function(variables)
 ## ## ## filtering on the amount column ## ## ##
 read_charxl_data <- function(excel_file) 
 {
-    dataOnly <- 
-        read_charxl_full(excel_file) %>% 
+    read_charxl_full(excel_file) %>% 
         select(1:11) %>% 
         mutate_all(funs(as.numeric)) %>% #some vals disappear in some files if str8 to bigint (see 0920.xlsx)
         mutate_all(round) %>% 
-        mutate_all(funs(as.integer64)) %>% 
-        filter(!is.na(X11))
-    dataOnly
+        filter(!is.na(X__11)) %>% 
+        mutate_all(funs(as.integer64))
 }
-
+read_charxl_data("1760_.xlsx")
+warnings()
 # Use dataOnly frame to generate count of rows of data in file
 dataRowCount_excel <- function(excel_file) 
 {
-    dataRowCount <- 
-        read_charxl_data(excel_file) %>% 
+    read_charxl_data(excel_file) %>% 
         nrow
-    dataRowCount
 }
 
 # Use dataOnly frame to generate sum of specified column
@@ -166,7 +155,9 @@ sumOfColumn_csv <- function(csv_file)
 file_extension <- "xlsx"
 ## Test local directory without spaces
 getwd()
+# batch file path - but the bash environment doesn't allow one to see the excel totals properly
 file_path <- "C:/Users/Koyot/Documents/GitHub/readxl_bulkloadR/bulkloadR_staging/"
+# Run a local version to see that the amounts totals are equal
 # to check what is in the actual LEP
 setwd(file_path)
 getwd()
@@ -201,7 +192,9 @@ cat("\n")
 # Table of all the Headers
 Tbl_headers <-
     bind_cols(data_frame(file_names),
-              data.frame(do.call("rbind", lapply(file_names, read_excel_headers))))
+              data.frame(do.call("rbind", 
+                                 lapply(file_names, read_excel_headers)
+                                 )))
 print("Tbl_headers:")
 glimpse(Tbl_headers)
 write.csv(Tbl_headers, "../analysis/Tbl_headers.csv", na = "", row.names = F)
