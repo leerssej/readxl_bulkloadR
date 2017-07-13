@@ -51,7 +51,6 @@ read_charxl_full <- function(excel_file)
 {
     read_excel(excel_file, col_types ="text", col_names = F)
 }
-read_charxl_full("1760_.xlsx")
 
 as.double_spprssWrns <- function(variables) 
 {
@@ -75,8 +74,8 @@ read_charxl_data <- function(excel_file)
         filter(!is.na(X__11)) %>% 
         mutate_all(funs(as.integer64))
 }
-read_charxl_data("1760_.xlsx")
 warnings()
+
 # Use dataOnly frame to generate count of rows of data in file
 dataRowCount_excel <- function(excel_file) 
 {
@@ -298,4 +297,5 @@ print("xlsx")
 Tbl_AmountSums_xlsx
 identical(Tbl_AmountSums_csv, Tbl_AmountSums_xlsx)
 all.equal(Tbl_AmountSums_csv, Tbl_AmountSums_xlsx)
+
 
